@@ -31,8 +31,6 @@ module.exports = {
       min_uptime:   '10s',
 
       // Logging
-      out_file:     '/var/log/pm2/miyulabs-out.log',
-      error_file:   '/var/log/pm2/miyulabs-err.log',
       merge_logs:   true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     },
