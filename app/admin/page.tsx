@@ -37,7 +37,7 @@ export default async function AdminDashboardPage() {
   return (
     <main
       style={{
-        minHeight:  '100vh',
+        height:     '100vh',
         background: 'var(--midnight)',
         color:      'var(--text-1)',
         overflowY:  'auto',
