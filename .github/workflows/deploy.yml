@@ -1,0 +1,103 @@
+# .github/workflows/deploy.yml
+#
+# CI/CD pipeline for MiyuLabs waitlist site
+# deploys to a ubuntu server with nginx
+#
+# On push to main:
+#   CI  → lint + tsc + build (on GitHub runner)
+#   CD  → SSH to server, pull, reinstall, migrate, rebuild, reload PM2
+#
+# Required GitHub Secrets:
+#   SSH_HOST          — server IP or domain
+#   SSH_USER          — deploy user
+#   SSH_PRIVATE_KEY   — private key (ed25519 or rsa)
+
+name: CI / Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]   # CI only on PRs — no deploy
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true   # cancel stale runs on rapid pushes
+
+jobs:
+  # ── CI ──
+  ci:
+    name: Lint · Type-check · Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+        env:
+          # Dummy values so Next.js doesn't bail during the CI build.
+          # Real secrets live on the server — never in GitHub env vars.
+          DATABASE_URL:           file:./dev.db
+          IP_HASH_SALT:           ci-placeholder-salt
+          SMTP_HOST:              localhost
+          SMTP_PORT:              465
+          SMTP_SECURE:            "true"
+          SMTP_USER:              ci@example.com
+          SMTP_PASS:              placeholder
+          SMTP_FROM_NAME:         CI
+          SMTP_FROM_EMAIL:        ci@example.com
+          NEXT_PUBLIC_APP_URL:    http://localhost:3000
+          ADMIN_SECRET_TOKEN:     ci-placeholder-token-32-chars-xx
+          ADMIN_COOKIE_MAX_AGE:   "604800"
+
+  # ── CD ──
+  deploy:
+    name: Deploy to server
+    runs-on: ubuntu-latest
+    needs: ci                  # only runs if CI passes
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host:        ${{ secrets.SSH_HOST }}
+          username:    ${{ secrets.SSH_USER }}
+          key:         ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd /var/www/miyulabs
+
+            echo "...pulling latest changes..."
+            git pull origin main
+
+            echo "...installing deps..."
+            npm ci   # postinstall: prisma generate runs automatically
+
+            echo "...running migrations..."
+            npx prisma migrate deploy
+
+            echo "...building..."
+            npm run build
+
+            echo "...reloading pm2..."
+            pm2 reload ecosystem.config.js --env production
+
+            echo "done ✓"
