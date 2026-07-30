@@ -1,0 +1,16 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Subscriber {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  source    String   @default("waitlist")
+  ipHash    String?  // SHA-256 of (ip + salt), first 16 chars — for dedup/abuse only
+}
