@@ -36,6 +36,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <main
+      className="scrollbar-none"
       style={{
         height:     '100vh',
         background: 'var(--midnight)',
