@@ -30,6 +30,22 @@ jobs:
     name: Lint · Type-check · Build
     runs-on: ubuntu-latest
 
+    env:
+      # Dummy values so Next.js/Prisma doesn't bail during the CI build.
+      # Real secrets live on the server — never in GitHub env vars.
+      DATABASE_URL:           file:./dev.db
+      IP_HASH_SALT:           ci-placeholder-salt
+      SMTP_HOST:              localhost
+      SMTP_PORT:              465
+      SMTP_SECURE:            "true"
+      SMTP_USER:              ci@example.com
+      SMTP_PASS:              placeholder
+      SMTP_FROM_NAME:         CI
+      SMTP_FROM_EMAIL:        ci@example.com
+      NEXT_PUBLIC_APP_URL:    http://localhost:3000
+      ADMIN_SECRET_TOKEN:     ci-placeholder-token-32-chars-xx
+      ADMIN_COOKIE_MAX_AGE:   "604800"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -51,21 +67,6 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          # Dummy values so Next.js doesn't bail during the CI build.
-          # Real secrets live on the server — never in GitHub env vars.
-          DATABASE_URL:           file:./dev.db
-          IP_HASH_SALT:           ci-placeholder-salt
-          SMTP_HOST:              localhost
-          SMTP_PORT:              465
-          SMTP_SECURE:            "true"
-          SMTP_USER:              ci@example.com
-          SMTP_PASS:              placeholder
-          SMTP_FROM_NAME:         CI
-          SMTP_FROM_EMAIL:        ci@example.com
-          NEXT_PUBLIC_APP_URL:    http://localhost:3000
-          ADMIN_SECRET_TOKEN:     ci-placeholder-token-32-chars-xx
-          ADMIN_COOKIE_MAX_AGE:   "604800"
 
   # ── CD ──
   deploy:
