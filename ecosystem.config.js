@@ -19,7 +19,7 @@ module.exports = {
 
       // Env passed to the Next.js process
       // The real secrets live in /var/www/miyulabs/.env — Next.js reads them automatically.
-      env_production: {
+      env: {
         NODE_ENV: 'production',
         PORT:     3001,
       },
