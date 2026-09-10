@@ -8,10 +8,10 @@
 module.exports = {
   apps: [
     {
-      name:         'miyulabs',
+      name:         'waitlist',
       script:       'node_modules/.bin/next',
       args:         'start',
-      cwd:          '/var/www/miyulabs',
+      cwd:          '/var/www/waitlist',
 
       // Keep a single instance (SQLite doesn't support multiple writers)
       instances:    1,
