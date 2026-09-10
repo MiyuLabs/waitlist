@@ -82,7 +82,7 @@ jobs:
           key:         ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            cd /var/www/miyulabs
+            cd /var/www/waitlist
 
             echo "...pulling latest changes..."
             git pull origin main
