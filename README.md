@@ -2,6 +2,7 @@
 
 Pre-launch landing page + waitlist for [MiyuLabs](https://miyulabs.in). Built with Next.js 16, Prisma + SQLite, and Nodemailer.
 
+> *Taken down the deployment following the launch of the main website.*
 ---
 
 ## Stack
